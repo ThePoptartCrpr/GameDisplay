@@ -1,0 +1,126 @@
+// Backend strings
+!CREATE STRING currentGame ONCE WITH No game detected!
+!CREATE STRING currentGameName ONCE WITH No game detected!
+!CREATE STRING displayTitle ONCE WITH &bGame&3Display
+!CREATE STRING generalInfoToggled ONCE WITH true
+
+// Generic strings
+!CREATE STRING gdcoins ONCE WITH 0
+
+// Quakecraft strings
+!CREATE STRING qheadshots ONCE WITH 0
+!CREATE STRING qkills ONCE WITH 0
+!CREATE STRING qks ONCE WITH 0
+!CREATE STRING qbks ONCE WITH 0
+
+// Settings
+trigger other(<list=GameDisplay>display title($title)) {
+  do {string[displayTitle]}.save($title)
+  chat &aTitle changed to {string[displayTitle]}
+}
+
+trigger other(<list=GameDisplay>display reset title) {
+  do {string[displayTitle]}.save(&bGame&3Display)
+  chat &aTitle changed to {string[displayTitle]}
+}
+
+trigger other(<list=GameDisplay>display toggle general) {
+  if {string<generalInfoToggled>}.=(true)
+    do {string<generalInfoToggled>}.save(false)
+	chat &cDisabled general information in the GameDisplay HUD.
+  else
+    do {string<generalInfoToggled>}.save(true)
+	chat &aEnabled general information in the GameDisplay HUD.
+  end
+}
+
+// Backend core stuff
+trigger onWorldLoad(<list=GameDisplay>setup GameDisplay) {
+  do {display[GameDisplay]}.clear()
+  do {display[GameDisplay]}.add({string<displayTitle>})
+  do {display[GameDisplay]}.add(&6Game: {string<currentGameName>})
+  if {string<generalInfoToggled>}.=(true)
+	do {display[GameDisplay]}.add({fpscol}{fps}&7fps &a{ping}&7ms)
+	do {display[GameDisplay]}.add(&b{x}&7x &b{y}&7y &b{z}&7z)
+	do {display[GameDisplay]}.add(&7Facing &a{facing}.capfirst())
+  end
+  do {display[GameDisplay]}.settings(left)
+  do {display[GameDisplay]}.setX(1) {display[GameDisplay]}.setY(1)
+}
+
+trigger onClientTick(<list=GameDisplay>update GameDisplay) {
+  do {display[GameDisplay]}.update()
+}
+
+trigger onWorldLoad(<list=GameDisplay>changegame) {
+  wait 1s
+  do {string<currentGame>}.save({scoreboardtitle}.remForm().replace(null,No game detected!))
+  do {string<currentGameName>}.save({string<currentGame>}.toLower().capitalizeAllWords().replace(Uhc,UHC).replace(Sg,SG))
+  // event:chat &aCurrent game: {string<currentGame>}
+  end
+}
+
+trigger onWorldLoad(<list=GameDisplay>clearvars) {
+  do {string<qheadshots>}.set(0)
+  do {string<qkills>}.set(0)
+  do {string<qks>}.set(0)
+  do {string<qbks>}.set(0)
+  do {string<gdcoins>}.set(0)
+}
+
+// QuakeCraft board creator
+trigger onWorldLoad(<list=GameDisplay>quakegame) {
+  wait 2s
+  if {string<currentGame>}.=(QUAKECRAFT)
+    do {display[GameDisplay]}.add(&eHeadshots: {string<qheadshots>})
+    do {display[GameDisplay]}.add(&cKills: {string<qkills>})
+    do {display[GameDisplay]}.add(&5Killstreak: {string<qks>})
+    do {display[GameDisplay]}.add(&5Best Killstreak: {string<qbks>})
+    do {display[GameDisplay]}.add(&6Coins: {string<gdcoins>})
+  end
+  end
+}
+
+// Skywars board creator
+trigger onWorldLoad(<list=GameDisplay>skywarsgame) {
+  wait 2s
+  if {string<currentGame>}.=(SKYWARS)
+    do {display[GameDisplay]}.add(&6Coins: {string<gdcoins>})
+  end
+  end
+}
+
+// QuakeCraft functions
+trigger other(<list=GameDisplay>count killstreak quakecraft) {
+  do {string<qks>}.set({string<qks>}.+(1))
+  if {string<qks>}.>({string<qbks>})
+    do {string<qbks>}.set({string<qks>})
+  end
+}
+
+// Generic chat triggers
+trigger chat(<list=GameDisplay><s>&r&6+{string[tcoins]} coins!) {
+  do {string<gdcoins>}.set({string<gdcoins>}.+({string[tcoins]}))
+}
+
+// QuakeCraft chat triggers
+trigger chat(<list=GameDisplay><s>{me} {string[killmsg]1} {string[killedplayer]1} HEADSHOT) {
+  if {string<currentGame>}.=(QUAKECRAFT)
+    do {string<qheadshots>}.set({string<qheadshots>}.+(1))
+    do {string<qkills>}.set({string<qkills>}.+(1))
+	trigger count killstreak quakecraft
+  end
+}
+
+trigger chat(<list=GameDisplay><s>{me} {string[killmsg]1} {string[killedplayer]1}) {
+  if {string<currentGame>}.=(QUAKECRAFT)
+    do {string<qkills>}.set({string<qkills>}.+(1))
+	trigger count killstreak quakecraft
+  end
+}
+
+trigger chat(<list=GameDisplay><s>{string[killerplayer]1} {string[killmsg]1} {me}) {
+  if {string<currentGame>}.=(QUAKECRAFT)
+    do {string<qks>}.set(0)
+  end
+}
