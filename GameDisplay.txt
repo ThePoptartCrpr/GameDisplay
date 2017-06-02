@@ -13,6 +13,10 @@
 !CREATE STRING qks ONCE WITH 0
 !CREATE STRING qbks ONCE WITH 0
 
+// Skywars strings
+!CREATE STRING skills ONCE WITH 0
+!CREATE STRING svoids ONCE WITH 0
+
 // Settings
 trigger other(<list=GameDisplay>display title($title)) {
   do {string[displayTitle]}.save($title)
@@ -55,7 +59,8 @@ trigger onClientTick(<list=GameDisplay>update GameDisplay) {
 trigger onWorldLoad(<list=GameDisplay>changegame) {
   wait 1s
   do {string<currentGame>}.save({scoreboardtitle}.remForm().replace(null,No game detected!))
-  do {string<currentGameName>}.save({string<currentGame>}.toLower().capitalizeAllWords().replace(Uhc,UHC).replace(Sg,SG))
+  // Cool icon thing by CluckPixel, keeping it here temporarily while I unbreak other things {string<currentGameName>}.save({string<currentGame>}.toLower().capitalizeAllWords().replace(Hypixel,{icon[compass]}  Main Lobby).replace(Skywars,{item[ender_eye]}  Skywars).replace(Arcade Games,{icon[slime_ball]}  Arcade Games).replace(The Tnt Games,{icon[tnt]}  TNT Games).replace(Housing,{icon[spruce_door]}  Housing).replace(Skyclash,{icon[fire_charge]}  SkyClash).replace(Mega Walls,{icon[soul_sand]}  Mega Walls).replace(Blitz Sg,{icon[diamond_sword]}  Blitz Survival Games).replace().replace(Uhc Champions,{icon[golden_apple]}  UHC Champions).replace(Cops And Crims,{icon[iron_bars]}  Cops And Crims).replace(Crazy Walls,{icon[gold_block]}  Crazy Walls).replace(Warlords,{icon[stone_axe]}  Warlords).replace(Speed Uhc,{icon[golden_carrot]}  Speed UHC).replace(Smash Heroes,{icon[sponge]}  Smash Heroes).replace(Prototype,{icon[anvil]}  Prototype Lobby).replace(Classic Games,{icon[jukebox]}  Classic Games).replace(Vampirez,{// icon[ghast_tear]}  VampireZ).replace(Quakecraft,{icon[fireworks]}  Quakecraft).replace(Paintball,{icon[snowball]}  Paintball).replace(Arena Brawl,{icon[blaze_powder]}  Arena Brawl).replace(The Walls,{icon[sand]}  The Walls).replace(Turbo Kart Racers,{icon[minecart]}  Turbo Kart Racers))
+  do {string<currentGameName>}.save({string<currentGame>}.toLower().capitalizeAllWords().replace(Uhc,UHC).replace(Sg,SG))  
   // event:chat &aCurrent game: {string<currentGame>}
   end
 }
@@ -66,6 +71,8 @@ trigger onWorldLoad(<list=GameDisplay>clearvars) {
   do {string<qks>}.set(0)
   do {string<qbks>}.set(0)
   do {string<gdcoins>}.set(0)
+  do {string<skills>}.set(0)
+  do {string<svoids>}.set(0)
 }
 
 // QuakeCraft board creator
@@ -86,6 +93,8 @@ trigger onWorldLoad(<list=GameDisplay>skywarsgame) {
   wait 2s
   if {string<currentGame>}.=(SKYWARS)
     do {display[GameDisplay]}.add(&6Coins: {string<gdcoins>})
+    do {display[GameDisplay]}.add(&eKills: {string<skills>})
+    do {display[GameDisplay]}.add(&3Void Kills: {string<svoids>})
   end
   end
 }
@@ -122,5 +131,19 @@ trigger chat(<list=GameDisplay><s>{me} {string[killmsg]1} {string[killedplayer]1
 trigger chat(<list=GameDisplay><s>{string[killerplayer]1} {string[killmsg]1} {me}) {
   if {string<currentGame>}.=(QUAKECRAFT)
     do {string<qks>}.set(0)
+  end
+}
+
+// Skywars chat triggers
+trigger chat(<list=GameDisplay><s>&r{string[name]} &r&ewas killed by &r{string[color]}{me}&r&e.&r) {
+  if {string<currentGame>}.=(SKYWARS)
+    do {string<skills>}.set({string<skills>}.+(1))
+  end
+}
+
+trigger chat(<list=GameDisplay><s>&r{string[name]} &r&ewas thrown into the void by &r{string[color]}{me}&r&e.&r) {
+  if {string<currentGame>}.=(SKYWARS)
+    do {string<skills>}.set({string<skills>}.+(1))
+    do {string<svoids>}.set({string<svoids>}.+(1))
   end
 }
