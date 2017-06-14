@@ -3,6 +3,9 @@
 !CREATE STRING currentGameName ONCE WITH No game detected!
 !CREATE STRING displayTitle ONCE WITH &bGame&3Display
 !CREATE STRING generalInfoToggled ONCE WITH true
+!CREATE STRING xLocation ONCE WITH 1
+!CREATE STRING yLocation ONCE WITH 1
+!CREATE STRING hudDirection ONCE WITH left
 
 // Generic strings
 !CREATE STRING gdcoins ONCE WITH 0
@@ -38,6 +41,38 @@ trigger other(<list=GameDisplay>display toggle general) {
   end
 }
 
+trigger other(<list=GameDisplay>display location right) {
+  do {string<hudDirection>}.save(right)
+  chat &6HUD set to the &aright &6location.
+  do {string[xLocation]}.save(99.5)
+  do {string[yLocation]}.save(1)
+  trigger setup GameDisplay
+}
+
+trigger other(<list=GameDisplay>display location left) {
+  do {string<hudDirection>}.save(left)
+  chat &6HUD set to the &aleft &6location.
+  do {string[xLocation]}.save(1)
+  do {string[yLocation]}.save(1)
+  trigger setup GameDisplay
+}
+
+trigger other(<list=GameDisplay>display location center) {
+  do {string<hudDirection>}.save(center)
+  chat &6HUD set to the &acenter &6location.
+  do {string[xLocation]}.save(50)
+  do {string[yLocation]}.save(1)
+  trigger setup GameDisplay
+}
+
+trigger other(<list=GameDisplay>display location bottomright) {
+  do {string<hudDirection>}.save(bottomright)
+  chat &6HUD set to the &acenter &6location.
+  do {string[xLocation]}.save(99)
+  do {string[yLocation]}.save(99)
+  trigger setup GameDisplay
+}
+
 // Backend core stuff
 trigger onWorldLoad(<list=GameDisplay>setup GameDisplay) {
   do {display[GameDisplay]}.clear()
@@ -46,10 +81,18 @@ trigger onWorldLoad(<list=GameDisplay>setup GameDisplay) {
   if {string<generalInfoToggled>}.=(true)
 	do {display[GameDisplay]}.add({fpscol}{fps}&7fps &a{ping}&7ms)
 	do {display[GameDisplay]}.add(&b{x}&7x &b{y}&7y &b{z}&7z)
-	do {display[GameDisplay]}.add(&7Facing &a{facing}.capfirst())
+	do {display[GameDisplay]}.add(&7Facing &a{facing}.capall().replace( ,-))
   end
-  do {display[GameDisplay]}.settings(left)
-  do {display[GameDisplay]}.setX(1) {display[GameDisplay]}.setY(1)
+  if {string[hudDirection]}.=(left)
+    do {display[GameDisplay]}.settings(left)
+  elseif {string[hudDirection]}.=(right)
+    do {display[GameDisplay]}.settings(right)
+  elseif {string[hudDirection]}.=(center)
+    do {display[GameDisplay]}.settings(center)
+  elseif {string[hudDirection]}.=(bottomright)
+    do {display[GameDisplay]}.settings(up,right)
+  end
+  do {display[GameDisplay]}.setX({string[xLocation]}) {display[GameDisplay]}.setY({string[yLocation]})
 }
 
 trigger onClientTick(<list=GameDisplay>update GameDisplay) {
