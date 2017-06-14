@@ -1,0 +1,364 @@
+// String creation
+// Day resetters
+!CREATE STRING xph-day ONCE WITH test
+!CREATE STRING xph-daytest ONCE WITH test
+
+// Trackers
+!CREATE STRING xph-dailyxp ONCE WITH 0
+!CREATE STRING xph-dailyquests ONCE WITH 0
+!CREATE STRING xph-dailychallenges ONCE WITH 0
+!CREATE STRING xph-dailychallengesleft ONCE WITH 10
+!CREATE STRING xph-dailycoins ONCE WITH 0
+!CREATE STRING xph-dailytips ONCE WITH 0
+!CREATE STRING xph-dailytipssent ONCE WITH 0
+
+// XP Goal
+!CREATE STRING xph-xpgoal ONCE WITH 0
+!CREATE STRING xph-xpgoalprogress ONCE WITH 0
+
+// Totals
+!CREATE STRING xph-totalxp ONCE WITH 0
+!CREATE STRING xph-totalquests ONCE WITH 0
+!CREATE STRING xph-totalchallenges ONCE WITH 0
+!CREATE STRING xph-totalcoins ONCE WITH 0
+!CREATE STRING xph-totaltips ONCE WITH 0
+
+// Toggles
+!CREATE STRING xph-challengeinfo ONCE WITH true
+
+// Delivery man tracker
+!CREATE STRING xph-dailyvoted ONCE WITH false
+!CREATE STRING xph-totalvotes ONCE WITH 0
+!CREATE STRING xph-dailiesclaimed ONCE WITH false
+!CREATE STRING xph-totaldailies ONCE WITH 0
+!CREATE STRING xph-dailycard ONCE WITH false
+!CREATE STRING xph-totalcard ONCE WITH 0
+!CREATE STRING xph-dailydismissed ONCE WITH false
+
+// World load setup
+
+trigger onWorldFirstLoad(testForNewDay) {
+  // chat testing for new day
+  {string[xph-daytest]}.set({date})
+  if ({string[xph-daytest]} != {string[xph-day]}) 
+    // chat &aIt's a new day!
+    {string[xph-day]}.save({date})
+	// chat {string[xph-day]}
+
+	chat &e&m{br}
+	chat &aXP earned yesterday: &3{string[xph-dailyxp]}
+	chat &aQuests completed yesterday: &e{string[xph-dailyquests]}
+	chat &aChallenges completed yesterday: &e{string[xph-dailychallenges]}
+	chat &aCoins gained yesterday: &e{string[xph-dailycoins]}
+	chat &aTips received yesterday: &e{string[xph-dailytips]}
+	chat &e&m{br}
+	{string[xph-dailyvoted]}.set(false)
+	{string[xph-dailiesclaimed]}.set(false)
+	{string[xph-dailycard]}.set(false)
+	{string[xph-dailydismissed]}.set(false)
+	{string[xph-dailyxp]}.set(0)
+	{string[xph-dailyquests]}.set(0)
+	{string[xph-dailychallenges]}.set(0)
+	{string[xph-dailycoins]}.set(0)
+	{string[xph-dailytips]}.set(0)
+	{string[xph-dailychallengesleft]}.save(10)
+  else
+    // chat &cSame day!
+  end
+}
+
+// Debug commands
+trigger other(xph testnewday) {
+  trigger testForNewDay
+}
+
+trigger other(xph setday($day)) {
+  {string[xph-day]}.save($day)
+  chat {string[xph-day]}
+}
+
+// Commands
+trigger other(xph status) {
+  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  chat &eTotal challenges left: &b{string[xph-dailychallengesleft]}
+  chat &aTotal quests completed today: &e{string[xph-dailyquests]}
+  chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+}
+
+trigger other(xph setxpgoal($goal)) {
+  if ({string[xph-xpgoal]} == 0)
+    {string[xph-xpgoal]}.set($goal).save(~)
+    chat &aYou've set a new XP goal for &e$goal!
+  else
+    chat &eAre you sure you want to update your current goal?
+	chat &c&lThis will reset your progress! &r&e({string[xph-xpgoalprogress]}/{string[xph-xpgoal]})
+	chat clickable(&a[YES],run_command,/tr xph setxpgoal confirm $goal,&aUpdate your current goal) clickable(&c[NO],run_command,/tr xph denysetxpgoal,&cCancel)
+  end
+}
+
+trigger other(xph setxpgoal confirm($goal)) {
+  {string[xph-xpgoal]}.set($goal).save(~)
+  {string[xph-xpgoalprogress]}.save(0)
+  chat &aSet a new XP goal and cleared your progress.
+}
+
+trigger other(xph denysetxpgoal) {
+  chat &cCancelled.
+}
+
+trigger other(xph xpgoal progress) {
+  chat &aProgress: &e{string[xph-xpgoalprogress]}/{string[xph-xpgoal]}
+}
+
+// Functions
+
+// Challenge detectors
+trigger chat(\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string[xp]}&7&7 Hypixel Experience&r\n&r\n&r&7You can complete &e&e{string[challengesleft]} &7more challenges today.&r\n&r) {
+  {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+({string[xp]}))
+  {string[xph-dailychallenges]}.set({string[xph-dailychallenges]}.+(1))
+  {string[xph-dailychallengesleft]}.set({string[challengesleft]}))
+  {string[xph-totalxp]}.set({string[xph-totalxp]}.+({string[xp]}))
+  {string[xph-totalchallenges]}.+(1).save(~)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.orb
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
+  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+}
+
+// Challenge detectors
+trigger chat(\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string[xp]}&7&7 Hypixel Experience&r\n&r\n&r&7You can complete &e&c{string[challengesleft]} &7more challenges today.&r\n&r) {
+  {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+({string[xp]}))
+  {string[xph-dailychallenges]}.set({string[xph-dailychallenges]}.+(1))
+  {string[xph-dailychallengesleft]}.set({string[challengesleft]}))
+  {string[xph-totalxp]}.set({string[xph-totalxp]}.+({string[xp]}))
+  {string[xph-totalchallenges]}.+(1).save(~)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.orb
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
+  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+}
+
+// Challenge detectors
+trigger chat(\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string[xp]}&7&7 Hypixel Experience&r\n&r\n&r&7You can complete &e&a{string[challengesleft]} &7more challenges today.&r\n&r) {
+  {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+({string[xp]}))
+  {string[xph-dailychallenges]}.set({string[xph-dailychallenges]}.+(1))
+  {string[xph-dailychallengesleft]}.set({string[challengesleft]}))
+  {string[xph-totalxp]}.set({string[xph-totalxp]}.+({string[xp]}))
+  {string[xph-totalchallenges]}.+(1).save(~)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.orb
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
+  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+}
+
+// Quest detectors
+trigger chat(<s>\n&r&a{string[type]} Quest: {string[quest]} Completed!&r\n&r&7 &8+&3{string[xp]}&7&7 Hypixel Experience&r\n&r&7 &8+&6{string[coins]}&7 &7{string[game]} Coins&r) {
+  {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+({string[xp]}))
+  {string[xph-dailyquests]}.set({string[xph-dailyquests]}.+(1))
+  {string[xph-dailycoins]}.set({string[xph-dailycoins]}.+({string[coins]}))
+  {string[xph-totalxp]}.set({string[xph-totalxp]}.+({string[xp]}))
+  {string[xph-totalquests]}.set({string[xph-totalxp]}.+(1))
+  {string[xph-totalcoins]}.+({string[coins]}).save(~)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.orb
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
+  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  chat &aTotal quests completed today: &e{string[xph-dailyquests]}
+  chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+}
+
+// Tip detectors
+trigger chat(&aYou earned &r&e{string[coins]} coins&r&a and &r&9{string[xp]} experience&r&a from {string[game]} tips in the last minute!&r) {
+  {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+({string[xp]}))
+  {string[xph-dailytips]}.set({string[xph-dailytips]}.+(1))
+  {string[xph-dailycoins]}.set({string[xph-dailycoins]}.+({string[coins]}))
+  {string[xph-totalxp]}.set({string[xph-totalxp]}.+({string[xp]}))
+  {string[xph-totaltips]}.set({string[xph-totaltips]}.+(1))
+  {string[xph-totalcoins]}.+({string[coins]}).save(~)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.orb
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
+  chat &aTotal tips received today: &b{string[xph-dailytips]}
+  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+}
+
+// Tip detectors
+trigger chat(&aYou tipped {string[name]}&r&a in {string[game]}&r) {
+  {string[xph-dailytipssent]}.+(1).set(~)
+  {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+(50))
+  {string[xph-dailycoins]}.set({string[xph-dailycoins]}.+(15))
+  {string[xph-totalxp]}.set({string[xph-totalxp]}.+(50))
+  {string[xph-totalcoins]}.+(15).save(~)
+}
+
+// Delivery man tracker
+trigger chat(&r&aYou have successfully claimed &r&32,000 &r&3Hypixel &r&3Experience&r&a and &r&63,000 &r&6Arcade &r&6Coins&r&a!&r) {
+  {string[xph-dailiesclaimed]}.set(true)
+  {string[xph-totaldailies]}.+(1).save(~)
+  chat &a+&e1 dailies claimed (&aTotal: &b{string[xph-totaldailies]}&e)
+}
+
+trigger chat(&6Thanks for supporting the server! You earned &r&95,000 XP&r&6 and 3,000 Arcade Coins!&r) {
+  {string[xph-dailyvoted]}.set(true)
+  {string[xph-totalvotes]}.+(1).save(~)
+  chat &a+&e1 votes (&aTotal: &b{string[xph-totalvotes]}&e)
+}
+
+trigger chat(&fYou have claimed a &r&f&l{string[card]} &r&freward card!&r) {
+  {string[xph-dailycard]}.set(true)
+  {string[xph-totalcard]}.+(1).save(~)
+  chat &a+&e1 cards claimed (&aTotal: &b{string[xph-totalcard]}&e)
+}
+
+trigger onWorldLoad(delivery man tracker) {
+  if ({string[xph-dailydismissed]} == false)
+  if ({string[xph-dailyvoted]} == false || {string[xph-dailiesclaimed]} == false || {string[xph-dailycard]} == false)
+  wait 40
+    chat &e&m{br}
+	if ({string[xph-dailyvoted]} == false && {string[xph-dailycard]} == false && {string[xph-dailiesclaimed]} == false)
+      chat &cYou haven't claimed your daily rewards or voted yet today!
+	elseif ({string[xph-dailyvoted]} == false && {string[xph-dailycard]} == false)
+	  chat &cYou haven't claimed your daily rewards or voted yet today!
+	elseif ({string[xph-dailyvoted]} == false && {string[xph-dailiesclaimed]} == false)
+	  chat &cYou haven't claimed your daily rewards or voted yet today!
+	elseif ({string[xph-dailiesclaimed]} == false && {string[xph-dailycard]} == false)
+	  chat &cYou haven't claimed your daily rewards yet today!
+	elseif ({string[xph-dailiesclaimed]} == false)
+	  chat &cYou haven't claimed your daily rewards yet today!
+	elseif ({string[xph-dailycard]} == false)
+	  chat &cYou haven't claimed your daily rewards yet today!
+	elseif ({string[xph-dailyvoted]} == false)
+	  chat &cYou haven't voted yet today!
+	end
+	chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+    chat &e&m{br}
+  end
+  end
+  end
+}
+
+// trigger onWorldLoad(delivery man tracker) {
+  // if ({string[xph-dailydismissed]} == false)
+  	// if ({string[xph-dailyvoted]} == false && [xph-dailycard]} == false && [xph-dailiesclaimed]} == false)
+	// wait 40
+	  // chat &e&m{br
+      // chat &cYou haven't claimed your daily rewards or voted yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br
+	// end
+	// elseif ({string[xph-dailyvoted]} == false && [xph-dailycard]} == false)
+	// wait 40
+	  // chat &e&m{br
+	  // chat &cYou haven't claimed your daily rewards or voted yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br
+	// end
+	// elseif ({string[xph-dailyvoted]} == false && {xph-dailiesclaimed]} == false)
+	// wait 40
+	  // chat &e&m{br
+	  // chat &cYou haven't claimed your daily rewards or voted yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br}
+	// end
+	// elseif ({string[xph-dailiesclaimed]} == false && {xph-dailycard]} == false)
+	// wait 40
+	  // chat &e&m{br}
+	  // chat &cYou haven't claimed your daily rewards yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br}
+	// end
+	// elseif ({string[xph-dailiesclaimed]} == false)
+	// wait 40
+	  // chat &e&m{br}
+	  // chat &cYou haven't claimed your daily rewards yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br}
+	// end
+	// elseif ({string[xph-dailycard]} == false)
+	// wait 40
+	  // chat &e&m{br}
+	  // chat &cYou haven't claimed your daily rewards yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br}
+	// end
+	// elseif ({string[xph-dailyvoted]} == false)
+	// wait 40
+	  // chat &e&m{br}
+	  // chat &cYou haven't voted yet today!
+	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
+	  // chat &e&m{br}
+	// end
+	// end
+  // end
+// }
+
+trigger other(xph dismiss daily warning) {
+  chat &e&m{br}
+  chat &cDismissed this warning.
+  {string[xph-dailydismissed]}.save(true)
+  chat &e&m{br}
+  // chat clickable(&acome back,run_command,/tr xph daily come back,come back)
+}
+
+trigger other(xph daily come back) {
+  chat came back
+  {string[xph-dailydismissed]}.save(false)
+}
+
+
+// \n&r&aDon't Blink Challenge Completed!&r\n&r&7 &8+&32400&7&7 Hypixel Experience&r\n&r\n&r&7You can complete &e&e6 &7more challenges today.&r\n&r
+
+// \n&r&aDaily Quest: Sniper Completed!&r\n&r&7 &8+&32500&7&7 Hypixel Experience&r\n&r&7 &8+&61750&7 &7Quakecraft Coins&r\n&r
+
+// &aYou earned &r&e120 coins&r&a and &r&90 experience&r&a from VampireZ tips in the last minute!&r
+
+// &r&aYou have successfully claimed &r&32,000 &r&3Hypixel &r&3Experience&r&a and &r&63,000 &r&6Arcade &r&6Coins&r&a!&r
+
+// &6Thanks for supporting the server! You earned &r&95,000 XP&r&6 and 3,000 Arcade Coins!&r
+
+// &fYou have claimed a &r&f&l[Common Smash Heroes Coins] &r&freward card!&r
