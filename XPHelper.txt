@@ -239,12 +239,20 @@ trigger chat(&aYou tipped {string[name]}&r&a in {string[game]}&r) {
 // Delivery man tracker
 trigger chat(&r&aYou have successfully claimed &r&32,000 &r&3Hypixel &r&3Experience&r&a and &r&63,000 &r&6Arcade &r&6Coins&r&a!&r) {
   {string[xph-dailiesclaimed]}.set(true)
+  {string[xph-dailyxp]}.+(2000).set(~)
+  {string[xph-dailycoins]}.+(3000).set(~)
+  {string[xph-totalxp]}.+(2000).set(~)
+  {string[xph-totalcoins]}.+(3000).set(~)
   {string[xph-totaldailies]}.+(1).save(~)
   chat &a+&e1 dailies claimed (&aTotal: &b{string[xph-totaldailies]}&e)
 }
 
 trigger chat(&6Thanks for supporting the server! You earned &r&95,000 XP&r&6 and 3,000 Arcade Coins!&r) {
   {string[xph-dailyvoted]}.set(true)
+  {string[xph-dailyxp]}.+(5000).set(~)
+  {string[xph-dailycoins]}.+(3000).set(~)
+  {string[xph-totalxp]}.+(5000).set(~)
+  {string[xph-totalcoins]}.+(3000).set(~)
   {string[xph-totalvotes]}.+(1).save(~)
   chat &a+&e1 votes (&aTotal: &b{string[xph-totalvotes]}&e)
 }
