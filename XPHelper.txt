@@ -30,6 +30,7 @@
 !CREATE STRING xph-tipinfo ONCE WITH true
 !CREATE STRING xph-questinfo ONCE WITH true
 !CREATE STRING xph-deliveryopen ONCE WITH true
+!CREATE STRING xph-deliverywarning ONCE WITH true
 
 // Delivery man tracker
 !CREATE STRING xph-dailyvoted ONCE WITH false
@@ -49,25 +50,27 @@ trigger onWorldFirstLoad(<list=XPHelper>testForNewDay) {
     // chat &aIt's a new day!
     {string[xph-day]}.save({date})
 	// chat {string[xph-day]}
-
-	chat &e&m{br}
-	chat &aXP earned yesterday: &3{string[xph-dailyxp]}
-	chat &aQuests completed yesterday: &e{string[xph-dailyquests]}
-	chat &aChallenges completed yesterday: &e{string[xph-dailychallenges]}
-	chat &aCoins gained yesterday: &e{string[xph-dailycoins]}
-	chat &aTips received yesterday: &e{string[xph-dailytips]}
-	chat &e&m{br}
-	{string[xph-dailyvoted]}.set(false)
-	{string[xph-dailiesclaimed]}.set(false)
-	{string[xph-dailycard]}.set(false)
-	{string[xph-dailydismissed]}.set(false)
-	{string[xph-dailyxp]}.set(0)
-	{string[xph-dailyquests]}.set(0)
-	{string[xph-dailychallenges]}.set(0)
-	{string[xph-dailycoins]}.set(0)
-	{string[xph-dailytips]}.set(0)
-	{string[xph-dailytipssent]}.set(0)
-	{string[xph-dailychallengesleft]}.save(10)
+	wait 40
+	  chat &e&m{br}
+	  chat &aXP earned yesterday: &3{string[xph-dailyxp]}
+	  chat &aQuests completed yesterday: &e{string[xph-dailyquests]}
+	  chat &aChallenges completed yesterday: &e{string[xph-dailychallenges]}
+	  chat &aCoins gained yesterday: &e{string[xph-dailycoins]}
+	  chat &aTips received yesterday: &e{string[xph-dailytips]}
+	  chat &e&m{br}
+	  
+	  {string[xph-dailyvoted]}.set(false)
+	  {string[xph-dailiesclaimed]}.set(false)
+	  {string[xph-dailycard]}.set(false)
+	  {string[xph-dailydismissed]}.set(false)
+	  {string[xph-dailyxp]}.set(0)
+	  {string[xph-dailyquests]}.set(0)
+	  {string[xph-dailychallenges]}.set(0)
+	  {string[xph-dailycoins]}.set(0)
+	  {string[xph-dailytips]}.set(0)
+	  {string[xph-dailytipssent]}.set(0)
+	  {string[xph-dailychallengesleft]}.save(10)
+	end
   else
     // chat &cSame day!
   end
@@ -218,6 +221,11 @@ trigger other(<list=XPHelper>xph deliveryman) {
   else
     chat clickable(&c[OFF],run_command,/tr xph toggledeliveryopen,&7Turn &aON) &7- &bAutomatically open Delivery Man links
   end
+  if ({string[xph-deliverywarning]} == true)
+    chat clickable(&a[ON],run_command,/tr xph toggledeliverywarning,&7Turn &cOFF) &7- &bWarns you if you have not claimed daily rewards or voted yet when you switch lobbies.
+  else
+    chat clickable(&c[OFF],run_command,/tr xph toggledeliverywarning,&7Turn &aON) &7- &bWarns you if you have not claimed daily rewards or voted yet when you switch lobbies.
+  end
   chat
   chat clickable(&c« Back,run_command,/tr xph settings,&cBack)
   chat &e&m{br}
@@ -257,6 +265,15 @@ trigger other(<list=XPHelper>xph toggledeliveryopen) {
     {string<xph-deliveryopen>}.save(false)
   else
     {string<xph-deliveryopen>}.save(true)
+  end
+  trigger xph deliveryman
+}
+
+trigger other(<list=XPHelper>xph toggledeliverywarning) {
+  if ({string[xph-deliverywarning]} == true)
+    {string<xph-deliverywarning>}.save(false)
+  else
+    {string<xph-deliverywarning>}.save(true)
   end
   trigger xph deliveryman
 }
@@ -322,7 +339,7 @@ trigger other(<list=XPHelper>xph status lifetime) {
   chat &aTotal reward cards claimed: &e{string[xph-totalcard]}
   chat &atotal daily rewards claimed: &e{string[xph-totaldailies]}
   chat
-  chat &aTotal XP Bags opened: &e{string[totalbags]}
+  chat &aTotal XP Bags opened: &e{string[xph-totalbags]}
   chat
   chat clickable(&b[DAILY STATS],run_command,/tr xph status,&bView your daily stats)
   chat
@@ -537,6 +554,9 @@ trigger chat(<list=XPHelper>&aYou tipped {string[name]}&r&a in {string[game]}&r)
   {string[xph-dailycoins]}.set({string[xph-dailycoins]}.+(15))
   {string[xph-totalxp]}.set({string[xph-totalxp]}.+(50))
   {string[xph-totalcoins]}.+(15).save(~)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
 }
 
 // Bag detectors
@@ -544,6 +564,9 @@ trigger chat(<list=XPHelper>You opened a bag of {string[EXP]} Hypixel Experience
   {string[xph-dailyxp]}.+({string[EXP]}).set(~)
   {string[xph-totalxp]}.+({string[EXP]}).set(~)
   chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
 }
 
 // Delivery man tracker
@@ -555,6 +578,9 @@ trigger chat(<list=XPHelper>&r&aYou have successfully claimed &r&32,000 &r&3Hypi
   {string[xph-totalcoins]}.+(3000).set(~)
   {string[xph-totaldailies]}.+(1).save(~)
   chat &a+&e1 dailies claimed (&aTotal: &b{string[xph-totaldailies]}&e)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
 }
 
 trigger chat(<list=XPHelper>&6Thanks for supporting the server! You earned &r&95,000 XP&r&6 and 3,000 Arcade Coins!&r) {
@@ -565,6 +591,9 @@ trigger chat(<list=XPHelper>&6Thanks for supporting the server! You earned &r&95
   {string[xph-totalcoins]}.+(3000).set(~)
   {string[xph-totalvotes]}.+(1).save(~)
   chat &a+&e1 votes (&aTotal: &b{string[xph-totalvotes]}&e)
+  if ({string[xph-xpgoal]} != 0)
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+  end
 }
 
 trigger chat(<list=XPHelper>&fYou have claimed a &r&f&l{string[card]} &r&freward card!&r) {
@@ -574,6 +603,7 @@ trigger chat(<list=XPHelper>&fYou have claimed a &r&f&l{string[card]} &r&freward
 }
 
 trigger onWorldLoad(<list=XPHelper>delivery man tracker) {
+  if ({string[xph-deliverywarning]} == true)
   if ({string[xph-dailydismissed]} == false)
   if ({string[xph-dailyvoted]} == false || {string[xph-dailiesclaimed]} == false || {string[xph-dailycard]} == false)
   wait 40
@@ -595,6 +625,7 @@ trigger onWorldLoad(<list=XPHelper>delivery man tracker) {
 	end
 	chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
     chat &e&m{br}
+  end
   end
   end
   end
