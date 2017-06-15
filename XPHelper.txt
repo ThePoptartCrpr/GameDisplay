@@ -555,7 +555,7 @@ trigger chat(<list=XPHelper>&aYou tipped {string[name]}&r&a in {string[game]}&r)
   {string[xph-totalxp]}.set({string[xph-totalxp]}.+(50))
   {string[xph-totalcoins]}.+(15).save(~)
   if ({string[xph-xpgoal]} != 0)
-    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(50))
   end
 }
 
@@ -565,7 +565,7 @@ trigger chat(<list=XPHelper>You opened a bag of {string[EXP]} Hypixel Experience
   {string[xph-totalxp]}.+({string[EXP]}).set(~)
   chat &aTotal XP gained today: &9{string[xph-dailyxp]}
   if ({string[xph-xpgoal]} != 0)
-    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[EXP]}))
   end
 }
 
