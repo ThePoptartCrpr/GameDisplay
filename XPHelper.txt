@@ -77,13 +77,75 @@ trigger other(xph setday($day)) {
   chat {string[xph-day]}
 }
 
+// Aliases
+trigger other(xphelper) {
+  trigger xph
+}
+
+trigger other(xpstatus) {
+  trigger xph status
+}
+
+trigger other(xpprogress) {
+  trigger xph xpgoal progress
+}
+
 // Commands
+trigger other(xph) {
+  chat &e&m{br}
+  chat <center> &aXP&bHelper
+  chat clickable(&b[SETTINGS],run_command,/tr xph settings,&bManage XPHelper settings)
+  chat
+  chat clickable(&a[STATS],run_command,/tr xph status,&aView your daily XP stats)
+  chat
+  chat clickable(&c[GOALS],run_command,/tr xph xpgoals,&cView the XP goal menu)
+  chat
+  chat clickable(&2[QUESTS],run_command,/tr xph quests,&2View the Quests menu)
+  chat &e&m{br}
+}
+
 trigger other(xph status) {
+  chat &e&m{br}
   chat &aTotal XP gained today: &9{string[xph-dailyxp]}
   chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
   chat &eTotal challenges left: &b{string[xph-dailychallengesleft]}
   chat &aTotal quests completed today: &e{string[xph-dailyquests]}
   chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+  chat &aTotal tips received today: &e{string[xph-dailytips]}
+  chat &aTotal tips sent today: &e{string[xph-dailytipssent]}
+  chat
+  chat clickable(&c[LIFETIME STATS],run_command,/tr xph status lifetime,&cView your lifetime stats)
+  chat &e&m{br}
+}
+
+trigger other(xph status lifetime) {
+  chat &e&m{br}
+  chat &aTotal XP gained: &9{string[xph-totalxp]}
+  chat &eTotal challenges completed: &b{string[xph-totalchallenges]}
+  chat &aTotal quests completed: &e{string[xph-totalquests]}
+  chat &aTotal coins gained: &6{string[xph-totalcoins]}
+  chat &aTotal tips received: &e{string[xph-totaltips]}
+  chat &aTotal tips sent: &e{string[xph-totaltipssent]}
+  chat
+  chat &aTotal votes: &e{string[xph-totalvotes]}
+  chat &aTotal reward cards claimed: &e{string[xph-totalcard]}
+  chat &atotal daily rewards claimed: &e{string[xph-totaldailies]}
+  chat
+  chat clickable(&b[DAILY STATS],run_command,/tr xph status,&bView your daily stats)
+  chat &e&m{br}
+}
+
+trigger other(xph xpgoals) {
+  chat &e&m{br}
+  chat <center>&cXP Goal Menu
+  chat
+  if ({string[xph-xpgoal]} == 0)
+    chat &aNo goal is currently set. Would you like to create a new goal?
+	chat clickable(&c[CREATE A GOAL],suggest_command,/tr xph setxpgoal <amount>,&cSet a new XP goal)
+  else
+    chat &aCurrent progress: &e{string[xph-xpgoalprogress]}&a/&e{string[xph-xpgoal]}
+  end
+  chat &e&m{br}
 }
 
 trigger other(xph setxpgoal($goal)) {
@@ -108,7 +170,17 @@ trigger other(xph denysetxpgoal) {
 }
 
 trigger other(xph xpgoal progress) {
-  chat &aProgress: &e{string[xph-xpgoalprogress]}/{string[xph-xpgoal]}
+  if ({string[xph-xpgoal]} == 0)
+    chat &aYou currently do not have a goal set.
+  else
+    chat &aProgress: &e{string[xph-xpgoalprogress]}&a/&e{string[xph-xpgoal]}
+  end
+}
+
+trigger other(xph quests) {
+  chat &e&m{br}
+  chat &cComing soon!
+  chat &e&m{br}
 }
 
 // Functions
@@ -370,3 +442,5 @@ trigger other(xph daily come back) {
 // &6Thanks for supporting the server! You earned &r&95,000 XP&r&6 and 3,000 Arcade Coins!&r
 
 // &fYou have claimed a &r&f&l[Common Smash Heroes Coins] &r&freward card!&r
+
+// &r&d+25 Karma!&r
