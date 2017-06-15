@@ -500,7 +500,7 @@ trigger chat(<list=XPHelper><s>\n&r&a{string[type]} Quest: {string[quest]} Compl
   {string[xph-dailyquests]}.set({string[xph-dailyquests]}.+(1))
   {string[xph-dailycoins]}.set({string[xph-dailycoins]}.+({string[coins]}))
   {string[xph-totalxp]}.set({string[xph-totalxp]}.+({string[xp]}))
-  {string[xph-totalquests]}.set({string[xph-totalxp]}.+(1))
+  {string[xph-totalquests]}.set({string[xph-totalquests]}.+(1))
   {string[xph-totalcoins]}.+({string[coins]}).save(~)
   if ({string[xph-xpgoal]} != 0)
     {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
