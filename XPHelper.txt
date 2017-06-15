@@ -22,6 +22,7 @@
 !CREATE STRING xph-totalchallenges ONCE WITH 0
 !CREATE STRING xph-totalcoins ONCE WITH 0
 !CREATE STRING xph-totaltips ONCE WITH 0
+!CREATE STRING xph-totaltipssent ONCE WITH 0
 
 // Toggles
 !CREATE STRING xph-challengeinfo ONCE WITH true
@@ -302,6 +303,7 @@ trigger chat(&aYou earned &r&e{string[coins]} coins&r&a and &r&9{string[xp]} exp
 // Tip detectors
 trigger chat(&aYou tipped {string[name]}&r&a in {string[game]}&r) {
   {string[xph-dailytipssent]}.+(1).set(~)
+  {string[xph-totaltipssent]}.+(1).set(~)
   {string[xph-dailyxp]}.set({string[xph-dailyxp]}.+(50))
   {string[xph-dailycoins]}.set({string[xph-dailycoins]}.+(15))
   {string[xph-totalxp]}.set({string[xph-totalxp]}.+(50))
