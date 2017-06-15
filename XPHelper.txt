@@ -26,6 +26,8 @@
 
 // Toggles
 !CREATE STRING xph-challengeinfo ONCE WITH true
+!CREATE STRING xph-tipinfo ONCE WITH true
+!CREATE STRING xph-questinfo ONCE WITH true
 
 // Delivery man tracker
 !CREATE STRING xph-dailyvoted ONCE WITH false
@@ -103,6 +105,77 @@ trigger other(xph) {
   chat
   chat clickable(&2[QUESTS],run_command,/tr xph quests,&2View the Quests menu)
   chat &e&m{br}
+}
+
+trigger other(xph settings) {
+  chat &e&m{br}
+  chat <center> &bSettings
+  chat clickable(&aInformation,run_command,/tr xph information,&aToggle information popups)
+  chat &e&m{br}
+}
+
+trigger other(xph information) {
+  chat {msg(15)}
+  chat {msg(14)}
+  chat {msg(13)}
+  chat {msg(12)}
+  chat {msg(11)}
+  chat {msg(10)}
+  chat {msg(9)}
+  chat {msg(8)}
+  chat {msg(7)}
+  chat {msg(6)}
+  chat {msg(5)}
+  chat {msg(4)}
+  chat {msg(3)}
+  chat {msg(2)}
+  chat {msg(1)}
+  chat {msg(0)}
+  chat &e&m{br}
+  chat <center>&aInformation
+  if ({string[xph-challengeinfo]} == true)
+    chat clickable(&a[ON],run_command,/tr xph togglechallengeinfo,&7Turn &cOFF) &7- &bSpecial information when you complete a challenge
+  else
+    chat clickable(&c[OFF],run_command,/tr xph togglechallengeinfo,&7Turn &aON) &7- &bSpecial information when you complete a challenge
+  end
+  if ({string[xph-tipinfo]} == true)
+    chat clickable(&a[ON],run_command,/tr xph toggletipinfo,&7Turn &cOFF) &7- &bSpecial information when you receive a tip
+  else
+    chat clickable(&c[OFF],run_command,/tr xph toggletipinfo,&7Turn &aON) &7- &bSpecial information when you receive a tip
+  end
+  if ({string[xph-questinfo]} == true)
+    chat clickable(&a[ON],run_command,/tr xph togglequestinfo,&7Turn &cOFF) &7- &bSpecial information when you complete a quest
+  else
+    chat clickable(&c[OFF],run_command,/tr xph togglequestinfo,&7Turn &aON) &7- &bSpecial information when you complete a quest
+  end
+  chat &e&m{br}
+}
+
+trigger other(xph togglechallengeinfo) {
+  if ({string[xph-challengeinfo]} == true)
+    {string<xph-challengeinfo>}.save(false)
+  else
+    {string<xph-challengeinfo>}.save(true)
+  end
+  trigger xph information
+}
+
+trigger other(xph toggletipinfo) {
+  if ({string[xph-tipinfo]} == true)
+    {string<xph-tipinfo>}.save(false)
+  else
+    {string<xph-tipinfo>}.save(true)
+  end
+  trigger xph information
+}
+
+trigger other(xph togglequestinfo) {
+  if ({string[xph-questinfo]} == true)
+    {string<xph-questinfo>}.save(false)
+  else
+    {string<xph-questinfo>}.save(true)
+  end
+  trigger xph information
 }
 
 trigger other(xph status) {
@@ -204,8 +277,10 @@ trigger chat(\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string
 	{string[xph-xpgoalprogress]}.save(0)
   end
   end
-  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
-  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  if ({string[xph-challengeinfo]} == true)
+    chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+    chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  end
 }
 
 // Challenge detectors
@@ -226,8 +301,10 @@ trigger chat(\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string
 	{string[xph-xpgoalprogress]}.save(0)
   end
   end
-  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
-  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  if ({string[xph-challengeinfo]} == true)
+    chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+    chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  end
 }
 
 // Challenge detectors
@@ -248,8 +325,10 @@ trigger chat(\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string
 	{string[xph-xpgoalprogress]}.save(0)
   end
   end
-  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
-  chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  if ({string[xph-challengeinfo]} == true)
+    chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+    chat &eTotal challenges completed today: &b{string[xph-dailychallenges]}
+  end
 }
 
 // Quest detectors
@@ -271,9 +350,11 @@ trigger chat(<s>\n&r&a{string[type]} Quest: {string[quest]} Completed!&r\n&r&7 &
 	{string[xph-xpgoalprogress]}.save(0)
   end
   end
-  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
-  chat &aTotal quests completed today: &e{string[xph-dailyquests]}
-  chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+  if ({string[xph-questinfo]} == true)
+    chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+    chat &aTotal quests completed today: &e{string[xph-dailyquests]}
+    chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+  end
 }
 
 // Tip detectors
@@ -295,9 +376,11 @@ trigger chat(&aYou earned &r&e{string[coins]} coins&r&a and &r&9{string[xp]} exp
 	{string[xph-xpgoalprogress]}.save(0)
   end
   end
-  chat &aTotal tips received today: &b{string[xph-dailytips]}
-  chat &aTotal XP gained today: &9{string[xph-dailyxp]}
-  chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+  if ({string[xph-tipinfo]} == true)
+    chat &aTotal tips received today: &b{string[xph-dailytips]}
+    chat &aTotal XP gained today: &9{string[xph-dailyxp]}
+    chat &aTotal coins gained today: &6{string[xph-dailycoins]}
+  end
 }
 
 // Tip detectors
