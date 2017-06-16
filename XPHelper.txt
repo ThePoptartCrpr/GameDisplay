@@ -596,7 +596,7 @@ trigger chat(<list=XPHelper>&6Thanks for supporting the server! You earned &r&95
   end
 }
 
-trigger chat(<list=XPHelper>&fYou have claimed a &r&f&l{string[card]} &r&freward card!&r) {
+trigger chat(<list=XPHelper>&fYou have claimed a &r{string[color]}&l{string[card]} &r&freward card!&r) {
   {string[xph-dailycard]}.set(true)
   {string[xph-totalcard]}.+(1).save(~)
   chat &a+&e1 cards claimed (&aTotal: &b{string[xph-totalcard]}&e)
@@ -712,7 +712,7 @@ trigger chat(<list=XPHelper><c>&r&6Click the link to visit our website and claim
 trigger chat(<list=XPHelper>&aToday's voting link is &r&b{string[HV-vote]1}&r&a!&r&a &aFollow the instructions on the website to redeem &95,000 XP &aand &63,000 Arcade Coins&a!&r) {
   if ({string[xph-deliveryopen]} == true)
     chat &aAutomatically opening the voting link.
-	url {string[HV-vote]}
+	url http://{string[HV-vote]}
   end
 }
 
