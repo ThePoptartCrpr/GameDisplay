@@ -24,6 +24,7 @@
 !CREATE STRING xph-totaltips ONCE WITH 0
 !CREATE STRING xph-totaltipssent ONCE WITH 0
 !CREATE STRING xph-totalbags ONCE WITH 0
+!CREATE STRING xph-totalboxes ONCE WITH 0
 
 // Toggles
 !CREATE STRING xph-challengeinfo ONCE WITH true
@@ -41,8 +42,16 @@
 !CREATE STRING xph-totalcard ONCE WITH 0
 !CREATE STRING xph-dailydismissed ONCE WITH false
 
-// World load setup
+// Mystery Boxes
+!CREATE STRING xph-samereward ONCE WITH test
+!CREATE STRING xph-dust ONCE WITH test
+!CREATE STRING xph-size ONCE WITH 10
+!CREATE STRING xph-currentpage ONCE WITH 1
+!CREATE STRING xph-cannextpage ONCE WITH false
+!CREATE STRING xph-canprevpage ONCE WITH false
+!CREATE STRING xph-prevskip ONCE WITH 0
 
+// World load setup
 trigger onWorldFirstLoad(<list=XPHelper>testForNewDay) {
   // chat testing for new day
   {string[xph-daytest]}.set({date})
@@ -74,6 +83,11 @@ trigger onWorldFirstLoad(<list=XPHelper>testForNewDay) {
   else
     // chat &cSame day!
   end
+}
+
+trigger onWorldFirstLoad(import stuff) {
+  {list[xph-mysteryboxhistory]}.load(./mods/ChatTriggers/Imports/XPHelper/Data/MysteryBoxHistory.txt)
+  {list[xph-rewardcardhistory]}.load(./mods/ChatTriggers/Imports/XPHelper/Data/RewardCardHistory.txt)
 }
 
 // Debug commands
@@ -125,6 +139,8 @@ trigger other(<list=XPHelper>xph) {
   chat
   chat clickable(&a[STATS],run_command,/tr xph status,&aView your daily XP stats)
   chat
+  chat clickable(&6[INFO],run_command,/tr xph information,&6View your information)
+  chat
   chat clickable(&c[GOALS],run_command,/tr xph xpgoals,&cView the XP goal menu)
   chat
   chat clickable(&2[QUESTS],run_command,/tr xph quests,&2View the Quests menu)
@@ -150,15 +166,15 @@ trigger other(<list=XPHelper>xph settings) {
   chat {msg(0)}
   chat &e&m{br}
   chat <center> &bSettings
-  chat clickable(&aInformation,run_command,/tr xph information,&aToggle information popups)
+  chat clickable(&aInformation,run_command,/tr xph settings information,&aToggle information popups)
   chat
-  chat clickable(&6Delivery Man,run_command,/tr xph deliveryman,&aToggle Delivery Man settings)
+  chat clickable(&6Delivery Man,run_command,/tr xph settings deliveryman,&aToggle Delivery Man settings)
   chat
   chat clickable(&c« Back,run_command,/tr xph,&cBack)
   chat &e&m{br}
 }
 
-trigger other(<list=XPHelper>xph information) {
+trigger other(<list=XPHelper>xph settings information) {
   chat {msg(15)}
   chat {msg(14)}
   chat {msg(13)}
@@ -178,26 +194,26 @@ trigger other(<list=XPHelper>xph information) {
   chat &e&m{br}
   chat <center>&aInformation
   if ({string[xph-challengeinfo]} == true)
-    chat clickable(&a[ON],run_command,/tr xph togglechallengeinfo,&7Turn &cOFF) &7- &bSpecial information when you complete a challenge
+    chat clickable(&a[ON],run_command,/tr xph set setting(challengeinfo,information),&7Turn &cOFF) &7- &bSpecial information when you complete a challenge
   else
-    chat clickable(&c[OFF],run_command,/tr xph togglechallengeinfo,&7Turn &aON) &7- &bSpecial information when you complete a challenge
+    chat clickable(&c[OFF],run_command,/tr xph set setting(challengeinfo,information),&7Turn &aON) &7- &bSpecial information when you complete a challenge
   end
   if ({string[xph-tipinfo]} == true)
-    chat clickable(&a[ON],run_command,/tr xph toggletipinfo,&7Turn &cOFF) &7- &bSpecial information when you receive a tip
+    chat clickable(&a[ON],run_command,/tr xph set setting(tipinfo,information),&7Turn &cOFF) &7- &bSpecial information when you receive a tip
   else
-    chat clickable(&c[OFF],run_command,/tr xph toggletipinfo,&7Turn &aON) &7- &bSpecial information when you receive a tip
+    chat clickable(&c[OFF],run_command,/tr xph set setting(tipinfo,information),&7Turn &aON) &7- &bSpecial information when you receive a tip
   end
   if ({string[xph-questinfo]} == true)
-    chat clickable(&a[ON],run_command,/tr xph togglequestinfo,&7Turn &cOFF) &7- &bSpecial information when you complete a quest
+    chat clickable(&a[ON],run_command,/tr xph set setting(questinfo,information),&7Turn &cOFF) &7- &bSpecial information when you complete a quest
   else
-    chat clickable(&c[OFF],run_command,/tr xph togglequestinfo,&7Turn &aON) &7- &bSpecial information when you complete a quest
+    chat clickable(&c[OFF],run_command,/tr xph set setting(questinfo,information),&7Turn &aON) &7- &bSpecial information when you complete a quest
   end
   chat
   chat clickable(&c« Back,run_command,/tr xph settings,&cBack)
   chat &e&m{br}
 }
 
-trigger other(<list=XPHelper>xph deliveryman) {
+trigger other(<list=XPHelper>xph settings deliveryman) {
   chat {msg(15)}
   chat {msg(14)}
   chat {msg(13)}
@@ -217,14 +233,14 @@ trigger other(<list=XPHelper>xph deliveryman) {
   chat &e&m{br}
   chat <center>&6Delivery Man
   if ({string[xph-deliveryopen]} == true)
-    chat clickable(&a[ON],run_command,/tr xph toggledeliveryopen,&7Turn &cOFF) &7- &bAutomatically open Delivery Man links
+    chat clickable(&a[ON],run_command,/tr xph set setting(deliveryopen,deliveryman),&7Turn &cOFF) &7- &bAutomatically open Delivery Man links
   else
-    chat clickable(&c[OFF],run_command,/tr xph toggledeliveryopen,&7Turn &aON) &7- &bAutomatically open Delivery Man links
+    chat clickable(&c[OFF],run_command,/tr xph set setting(deliveryopen,deliveryman),&7Turn &aON) &7- &bAutomatically open Delivery Man links
   end
   if ({string[xph-deliverywarning]} == true)
-    chat clickable(&a[ON],run_command,/tr xph toggledeliverywarning,&7Turn &cOFF) &7- &bWarns you if you have not claimed daily rewards or voted yet when you switch lobbies.
+    chat clickable(&a[ON],run_command,/tr xph set setting(deliverywarning,deliveryman),&7Turn &cOFF) &7- &bWarns you if you have not claimed daily rewards or voted yet when you switch lobbies.
   else
-    chat clickable(&c[OFF],run_command,/tr xph toggledeliverywarning,&7Turn &aON) &7- &bWarns you if you have not claimed daily rewards or voted yet when you switch lobbies.
+    chat clickable(&c[OFF],run_command,/tr xph set setting(deliverywarning,deliveryman),&7Turn &aON) &7- &bWarns you if you have not claimed daily rewards or voted yet when you switch lobbies.
   end
   chat
   chat clickable(&c« Back,run_command,/tr xph settings,&cBack)
@@ -232,50 +248,13 @@ trigger other(<list=XPHelper>xph deliveryman) {
 }
 
 // Toggles
-
-trigger other(<list=XPHelper>xph togglechallengeinfo) {
-  if ({string[xph-challengeinfo]} == true)
-    {string<xph-challengeinfo>}.save(false)
+trigger other(<list=XPHelper>xph set setting($setting,$menu)) {
+  if ({string[xph-$setting]} == true)
+    {string<xph-$setting>}.save(false)
   else
-    {string<xph-challengeinfo>}.save(true)
+    {string<xph-$setting>}.save(true)
   end
-  trigger xph information
-}
-
-trigger other(<list=XPHelper>xph toggletipinfo) {
-  if ({string[xph-tipinfo]} == true)
-    {string<xph-tipinfo>}.save(false)
-  else
-    {string<xph-tipinfo>}.save(true)
-  end
-  trigger xph information
-}
-
-trigger other(<list=XPHelper>xph togglequestinfo) {
-  if ({string[xph-questinfo]} == true)
-    {string<xph-questinfo>}.save(false)
-  else
-    {string<xph-questinfo>}.save(true)
-  end
-  trigger xph information
-}
-
-trigger other(<list=XPHelper>xph toggledeliveryopen) {
-  if ({string[xph-deliveryopen]} == true)
-    {string<xph-deliveryopen>}.save(false)
-  else
-    {string<xph-deliveryopen>}.save(true)
-  end
-  trigger xph deliveryman
-}
-
-trigger other(<list=XPHelper>xph toggledeliverywarning) {
-  if ({string[xph-deliverywarning]} == true)
-    {string<xph-deliverywarning>}.save(false)
-  else
-    {string<xph-deliverywarning>}.save(true)
-  end
-  trigger xph deliveryman
+  trigger xph settings $menu
 }
 
 trigger other(<list=XPHelper>xph status) {
@@ -341,6 +320,8 @@ trigger other(<list=XPHelper>xph status lifetime) {
   chat
   chat &aTotal XP Bags opened: &e{string[xph-totalbags]}
   chat
+  chat &aTotal Mystery Boxes opened: &e{string[xph-totalboxes]}
+  chat
   chat clickable(&b[DAILY STATS],run_command,/tr xph status,&bView your daily stats)
   chat
   chat clickable(&c« Back,run_command,/tr xph,&cBack)
@@ -348,6 +329,22 @@ trigger other(<list=XPHelper>xph status lifetime) {
 }
 
 trigger other(<list=XPHelper>xph xpgoals) {
+  chat {msg(15)}
+  chat {msg(14)}
+  chat {msg(13)}
+  chat {msg(12)}
+  chat {msg(11)}
+  chat {msg(10)}
+  chat {msg(9)}
+  chat {msg(8)}
+  chat {msg(7)}
+  chat {msg(6)}
+  chat {msg(5)}
+  chat {msg(4)}
+  chat {msg(3)}
+  chat {msg(2)}
+  chat {msg(1)}
+  chat {msg(0)}
   chat &e&m{br}
   chat <center>&cXP Goal Menu
   chat
@@ -356,6 +353,7 @@ trigger other(<list=XPHelper>xph xpgoals) {
 	chat clickable(&c[CREATE A GOAL],suggest_command,/tr xph setxpgoal <amount>,&cSet a new XP goal)
   else
     chat &aCurrent progress: &e{string[xph-xpgoalprogress]}&a/&e{string[xph-xpgoal]} ({string[xph-xpgoalprogress]}./({string[xph-xpgoal]}).*(100).round()%)
+	chat &aXP left: &e{string[xph-xpgoal]}.-({string[xph-xpgoalprogress]})
   end
   chat
   chat clickable(&c« Back,run_command,/tr xph,&cBack)
@@ -364,7 +362,7 @@ trigger other(<list=XPHelper>xph xpgoals) {
 
 trigger other(<list=XPHelper>xph setxpgoal($goal)) {
   if ({string[xph-xpgoal]} == 0)
-    {string[xph-xpgoal]}.set($goal).save(~)
+    {string[xph-xpgoal]}.save($goal)
     chat &aYou've set a new XP goal for &e$goal!
 	sound random.levelup
   else
@@ -378,9 +376,9 @@ trigger other(<list=XPHelper>xph setxpgoal($goal)) {
 }
 
 trigger other(<list=XPHelper>xph setxpgoal confirm($goal)) {
-  {string[xph-xpgoal]}.set($goal).save(~)
+  {string[xph-xpgoal]}.set($goal)
   {string[xph-xpgoalprogress]}.save(0)
-  chat &aSet a new XP goal and cleared your progress.
+  chat &aSet a new XP goal for $goal and cleared your progress.
   sound random.levelup
 }
 
@@ -420,7 +418,337 @@ trigger other(<list=XPHelper>xph quests) {
   chat &e&m{br}
 }
 
+trigger other(<list=XPHelper>xph information) {
+  chat {msg(15)}
+  chat {msg(14)}
+  chat {msg(13)}
+  chat {msg(12)}
+  chat {msg(11)}
+  chat {msg(10)}
+  chat {msg(9)}
+  chat {msg(8)}
+  chat {msg(7)}
+  chat {msg(6)}
+  chat {msg(5)}
+  chat {msg(4)}
+  chat {msg(3)}
+  chat {msg(2)}
+  chat {msg(1)}
+  chat {msg(0)}
+  chat &e&m{br}
+  chat <center>&6Information
+  chat clickable(&6Reward Card History,run_command,/tr xph rewardcardhistory,&6View your previous Reward Cards)
+  chat 
+  chat clickable(&bMystery Box History,run_command,/tr xph mysteryboxhistory,&bView your previous Mystery Box rewards)
+  chat
+  chat clickable(&c« Back,run_command,/tr xph,&cBack)
+  chat &e&m{br}
+}
+
+trigger other(xph mysteryboxhistory($amount)) {
+  if ({list[xph-mysteryboxhistory]}.size().=(0)
+	chat {msg(15)}
+	chat {msg(14)}
+	chat {msg(13)}
+	chat {msg(12)}
+	chat {msg(11)}
+	chat {msg(10)}
+	chat {msg(9)}
+	chat {msg(8)}
+	chat {msg(7)}
+	chat {msg(6)}
+	chat {msg(5)}
+	chat {msg(4)}
+	chat {msg(3)}
+	chat {msg(2)}
+	chat {msg(1)}
+	chat {msg(0)}
+	chat &e&m{br}
+    chat &cYou haven't opened any mystery boxes yet.
+	chat
+	chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+	chat &e&m{br}
+	return
+  end
+  do {string[xph-size]}.set({list[xph-mysteryboxhistory]}.size())
+  if ($amount.>({string[xph-size]}))
+    chat &cYou don't have&a $amount &cpages, showing &a{string[size]} &cpages.
+  else
+    do {string[size]}.set($amount)
+  end
+  trigger xph history mystery box({string[xph-size]})
+}
+
+trigger other(xph mysteryboxhistory) {
+  if ({list[xph-mysteryboxhistory]}.size().equals(0))
+	chat {msg(15)}
+	chat {msg(14)}
+	chat {msg(13)}
+	chat {msg(12)}
+	chat {msg(11)}
+	chat {msg(10)}
+	chat {msg(9)}
+	chat {msg(8)}
+	chat {msg(7)}
+	chat {msg(6)}
+	chat {msg(5)}
+	chat {msg(4)}
+	chat {msg(3)}
+	chat {msg(2)}
+	chat {msg(1)}
+	chat {msg(0)}
+	chat &e&m{br}
+    chat &cYou haven't opened any mystery boxes yet.
+	chat
+	chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+	chat &e&m{br}
+    return
+  end
+  trigger xph reset skip
+  do {string[xph-size]}.set({list[xph-mysteryboxhistory]}.size())
+  if ({string[xph-size]}.>(10))
+    do {string[xph-size]}.set(10)
+  end
+  trigger xph history mystery box({string[xph-size]})
+}
+
+trigger other(<list=XPHelper>xph setmysteryboxhistory nextpage) {
+  {string[xph-currentpage]}.+(1).set(~)
+  {string[xph-prevskip]}.set({string[xph-size]})
+  {string[xph-size]}.+(10).save(~)
+  if ({string[xph-size]}.>=({list[xph-mysteryboxhistory]}.size()))
+    {string[xph-size]}.set({list[xph-mysteryboxhistory]}.size())
+	{string[xph-prevskip]}.save({string[xph-size]}.-(10))
+  end
+  trigger xph history mystery box({string[xph-size]})
+}
+
+trigger other(<list=XPHelper>xph setmysteryboxhistory prevpage) {
+  {string[xph-currentpage]}.-(1).set(~)
+  {string[xph-prevskip]}.-(10).set(~)
+  {string[xph-size]}.-(10).save(~)
+  if ({string[xph-prevskip]}.<(0)) 
+    {string[xph-prevskip]}.set(0)
+	{string[xph-size]}.save(10)
+  end
+  trigger xph history mystery box({string[xph-size]})
+}
+
+trigger other(xph reset skip) {
+  {string[xph-currentpage]}.set(1)
+  {string[xph-prevskip]}.set(0)
+  {string[xph-size]}.save(10)
+}
+
+trigger other(xph skip) {
+  chat {string[xph-prevskip]} {string[xph-size]} {string[xph-currentpage]}
+}
+
+trigger other(<list=XPHelper>xph history mystery box($size)) {
+  chat {msg(15)}
+  chat {msg(14)}
+  chat {msg(13)}
+  chat {msg(12)}
+  chat {msg(11)}
+  chat {msg(10)}
+  chat {msg(9)}
+  chat {msg(8)}
+  chat {msg(7)}
+  chat {msg(6)}
+  chat {msg(5)}
+  chat {msg(4)}
+  chat {msg(3)}
+  chat {msg(2)}
+  chat {msg(1)}
+  chat {msg(0)}
+  chat &e&m{br}
+  chat <center>&bMystery Box History
+  chat
+  chat &6Past Mystery Box rewards:
+  do {string[xph-skip]}.set({list[xph-mysteryboxhistory]}.size().-($size))
+  // {string[xph-currentsize]}.set($size.+(1))
+  // do $size.set(1)
+  for $reward : {list[xph-mysteryboxhistory]}
+    if ({string[xph-skip]}.=(0))
+	// chat {string[xph-prevskip]} $size
+	if ({string[xph-prevskip]}.<($size))
+	  chat &e$size. $reward
+	  // do $size.+(1).set(~)
+	  do $size.-(1).set(~)
+	  // if ($size.=({string[xph-currentsize]}))
+	  if ($size.=(0)
+	    chat 
+		chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+		chat &e&m{br}
+	    break
+	  end
+	else
+	  do $size.-(1).set(~)
+	end
+	else
+	  do {string[xph-skip]}.-(1).set(~)
+	end
+  end
+  chat
+  //{string[xph-currentpage]}.set({string[xph-size]}./(10).floor())
+  if ({string[xph-prevskip]} == 0)
+    {string[xph-canprevpage]}.set(false)
+  else
+    {string[xph-canprevpage]}.set(true)
+  end
+  if ({string[xph-size]}.>=({list[xph-mysteryboxhistory]}.size()))
+    {string[xph-cannextpage]}.set(false)
+  else
+    {string[xph-cannextpage]}.set(true)
+  end
+  if ({string[xph-canprevpage]} && {string[xph-cannextpage]})
+    chat <center>clickable(&6<,run_command,/tr xph setmysteryboxhistory prevpage,&6Previous Page)&6 Page {string[xph-currentpage]} clickable(&6>,run_command,/tr xph setmysteryboxhistory nextpage,&6Next Page)
+  elseif ({string[xph-canprevpage]} && !{string[xph-cannextpage]})
+    chat <center>clickable(&6<,run_command,/tr xph setmysteryboxhistory prevpage,&6Previous Page)&6 Page {string[xph-currentpage]} hover(&7>,&7On last page already.)
+  elseif (!{string[xph-canprevpage]} && {string[xph-cannextpage]})
+    chat <center>hover(&7<,&7On first page already.)&6 Page {string[xph-currentpage]} clickable(&6>,run_command,/tr xph setmysteryboxhistory nextpage,&6Next Page)
+  elseif (!{string[xph-canprevpage]} && !{string[xph-cannextpage]})
+    chat <center>hover(&7<,&7On first page already.)&6 Page {string[xph-currentpage]} hover(&7>,&7On last page already.)
+  end
+  chat 
+  chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+  chat &e&m{br}
+}
+
+>
+
+trigger other(<list=XPHelper>xph rewardcardhistory($amount)) {
+  if ({list[xph-rewardcardhistory]}.size().=(0)
+	chat {msg(15)}
+	chat {msg(14)}
+	chat {msg(13)}
+	chat {msg(12)}
+	chat {msg(11)}
+	chat {msg(10)}
+	chat {msg(9)}
+	chat {msg(8)}
+	chat {msg(7)}
+	chat {msg(6)}
+	chat {msg(5)}
+	chat {msg(4)}
+	chat {msg(3)}
+	chat {msg(2)}
+	chat {msg(1)}
+	chat {msg(0)}
+	chat &e&m{br}
+    chat &cYou haven't received any reward cards yet.
+	chat
+	chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+	chat &e&m{br}
+	return
+  end
+  do {string[xph-size]}.set({list[xph-rewardcardhistory]}.size())
+  if ($amount.>({string[xph-size]}))
+    chat &cYou don't have&a $amount &cpages, showing &a{string[size]} &cpages.
+  else
+    do {string[size]}.set($amount)
+  end
+  trigger xph history mystery box({string[xph-size]})
+}
+
+trigger other(xph rewardcardhistory) {
+  if ({list[xph-rewardcardhistory]}.size().equals(0))
+	chat {msg(15)}
+	chat {msg(14)}
+	chat {msg(13)}
+	chat {msg(12)}
+	chat {msg(11)}
+	chat {msg(10)}
+	chat {msg(9)}
+	chat {msg(8)}
+	chat {msg(7)}
+	chat {msg(6)}
+	chat {msg(5)}
+	chat {msg(4)}
+	chat {msg(3)}
+	chat {msg(2)}
+	chat {msg(1)}
+	chat {msg(0)}
+	chat &e&m{br}
+    chat &cYou haven't received any reward cards yet.
+	chat
+	chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+	chat &e&m{br}
+    return
+  end
+  do {string[xph-size]}.set({list[xph-rewardcardhistory]}.size())
+  if ({string[xph-size]}.>(7))
+    do {string[xph-size]}.set(7)
+  end
+  trigger xph history reward cards({string[xph-size]})
+}
+
+trigger other(<list=XPHelper>xph history reward cards($size)) {
+  chat {msg(15)}
+  chat {msg(14)}
+  chat {msg(13)}
+  chat {msg(12)}
+  chat {msg(11)}
+  chat {msg(10)}
+  chat {msg(9)}
+  chat {msg(8)}
+  chat {msg(7)}
+  chat {msg(6)}
+  chat {msg(5)}
+  chat {msg(4)}
+  chat {msg(3)}
+  chat {msg(2)}
+  chat {msg(1)}
+  chat {msg(0)}
+  chat &e&m{br}
+  chat <center>&6Reward Card History
+  chat &6Past&a $size &6Reward Cards received
+  do {string[xph-skip]}.set({list[xph-rewardcardhistory]}.size().-($size))
+  do $size.set(1)
+  {string[xph-currentsize]}.set($size)
+  do {list[xph-rewardcardhistory]}.reverse()
+  for $reward : {list[xph-rewardcardhistory]}
+    if ({string[xph-skip]}.=(0))
+	  chat &e$size. $reward
+	  do $size.+(1).set(~)
+	  if ($size.=({string[xph-currentsize]}))
+	    chat 
+		chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+		chat &e&m{br}
+	    break
+	  end
+	else
+	  do {string[xph-skip]}.-(1).set(~)
+	end
+  end
+  chat 
+  chat clickable(&c« Back,run_command,/tr xph information,&cBack)
+  chat &e&m{br}
+}
+
 // Functions
+
+// Mystery Box detectors
+trigger chat(<s>&r&r  &r&71x) {
+  do {list[xph-mysteryboxhistory]}.add({msg}.replace(&r&r  &r&71x ))
+  do {string[xph-samereward]}.set({msg}.replace(&r&r  &r&71x ))
+  do {list[xph-mysteryboxhistory]}.export(./mods/ChatTriggers/Imports/XPHelper/Data/MysteryBoxHistory.txt<compact>)
+  {string[xph-totalboxes]}.+(1).save(~)
+}
+
+trigger chat(&r&r&7received &r{string[xph-dust]} Mystery Dust&r&r &r&7instead.&r) {
+  do {list[xph-mysteryboxhistory]}.remove({list[xph-mysteryboxhistory]}.size().-(1))
+  do {string[xph-dust]}.remForm().set(~)
+  do {string[xph-samereward]}.replace(&l,&m).set(~)
+  do {list[xph-mysteryboxhistory]}.add({string[xph-samereward]}&r &b&l{string[xph-dust]} Mystery Dust)
+  do {list[xph-mysteryboxhistory]}.export(./mods/ChatTriggers/Imports/XPHelper/Data/MysteryBoxHistory.txt<compact>)
+}
+
+trigger other(<list=XPHelper>clearmysteryboxhistory) {
+  do {list[xph-mysteryboxhistory]}.clear()
+  do {list[xph-mysteryboxhistory]}.export(./mods/ChatTriggers/Imports/XPHelper/Data/MysteryBoxHistory.txt<compact>)
+  chat &aMystery box reward history cleared!
+}
 
 // Challenge detectors
 trigger chat(<list=XPHelper>\n&r&a{string[challenge]} Challenge Completed!&r\n&r&7 &8+&3{string[xp]}&7&7 Hypixel Experience&r\n&r\n&r&7You can complete &e&e{string[challengesleft]} &7more challenges today.&r\n&r) {
@@ -435,7 +763,7 @@ trigger chat(<list=XPHelper>\n&r&a{string[challenge]} Challenge Completed!&r\n&r
   if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
   if ({string[xph-xpgoal]} != 0)
     chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
-	sound random.orb
+	sound random.levelup
 	{string[xph-xpgoal]}.set(0)
 	{string[xph-xpgoalprogress]}.save(0)
   end
@@ -459,7 +787,7 @@ trigger chat(<list=XPHelper>\n&r&a{string[challenge]} Challenge Completed!&r\n&r
   if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
   if ({string[xph-xpgoal]} != 0)
     chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
-	sound random.orb
+	sound random.levelup
 	{string[xph-xpgoal]}.set(0)
 	{string[xph-xpgoalprogress]}.save(0)
   end
@@ -483,7 +811,7 @@ trigger chat(<list=XPHelper>\n&r&a{string[challenge]} Challenge Completed!&r\n&r
   if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
   if ({string[xph-xpgoal]} != 0)
     chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
-	sound random.orb
+	sound random.levelup
 	{string[xph-xpgoal]}.set(0)
 	{string[xph-xpgoalprogress]}.save(0)
   end
@@ -508,7 +836,7 @@ trigger chat(<list=XPHelper><s>\n&r&a{string[type]} Quest: {string[quest]} Compl
   if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
   if ({string[xph-xpgoal]} != 0)
     chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
-	sound random.orb
+	sound random.levelup
 	{string[xph-xpgoal]}.set(0)
 	{string[xph-xpgoalprogress]}.save(0)
   end
@@ -534,7 +862,7 @@ trigger chat(<list=XPHelper>&aYou earned &r&e{string[coins]} coins&r&a and &r&9{
   if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
   if ({string[xph-xpgoal]} != 0)
     chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
-	sound random.orb
+	sound random.levelup
 	{string[xph-xpgoal]}.set(0)
 	{string[xph-xpgoalprogress]}.save(0)
   end
@@ -557,15 +885,32 @@ trigger chat(<list=XPHelper>&aYou tipped {string[name]}&r&a in {string[game]}&r)
   if ({string[xph-xpgoal]} != 0)
     {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(50))
   end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.levelup
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
 }
 
 // Bag detectors
 trigger chat(<list=XPHelper>You opened a bag of {string[EXP]} Hypixel Experience!) {
   {string[xph-dailyxp]}.+({string[EXP]}).set(~)
   {string[xph-totalxp]}.+({string[EXP]}).set(~)
+  {string[xph-totalbags]}.+(1).save(~)
   chat &aTotal XP gained today: &9{string[xph-dailyxp]}
   if ({string[xph-xpgoal]} != 0)
     {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[EXP]}))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.levelup
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
   end
 }
 
@@ -579,7 +924,15 @@ trigger chat(<list=XPHelper>&r&aYou have successfully claimed &r&32,000 &r&3Hypi
   {string[xph-totaldailies]}.+(1).save(~)
   chat &a+&e1 dailies claimed (&aTotal: &b{string[xph-totaldailies]}&e)
   if ({string[xph-xpgoal]} != 0)
-    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(2000))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.levelup
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
   end
 }
 
@@ -592,7 +945,15 @@ trigger chat(<list=XPHelper>&6Thanks for supporting the server! You earned &r&95
   {string[xph-totalvotes]}.+(1).save(~)
   chat &a+&e1 votes (&aTotal: &b{string[xph-totalvotes]}&e)
   if ({string[xph-xpgoal]} != 0)
-    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+({string[xp]}))
+    {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(5000))
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.levelup
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
   end
 }
 
@@ -600,6 +961,41 @@ trigger chat(<list=XPHelper>&fYou have claimed a &r{string[color]}&l{string[card
   {string[xph-dailycard]}.set(true)
   {string[xph-totalcard]}.+(1).save(~)
   chat &a+&e1 cards claimed (&aTotal: &b{string[xph-totalcard]}&e)
+  if ({string[card]} == [Legendary Hypixel EXP])
+    {string[xph-dailyxp]}.+(100000).set(~)
+	{string[xph-totalxp]}.+(100000).save(~)
+    if ({string[xph-xpgoal]} != 0)
+       {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(100000))
+    end
+  elseif ({string[card]} == [Common Hypixel EXP])
+    {string[xph-dailyxp]}.+(10000).set(~)
+	{string[xph-totalxp]}.+(10000).save(~)
+    if ({string[xph-xpgoal]} != 0)
+       {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(10000))
+    end
+  elseif ({string[card]} == [Rare Hypixel EXP])
+    {string[xph-dailyxp]}.+(20000).set(~)
+	{string[xph-totalxp]}.+(20000).save(~)
+    if ({string[xph-xpgoal]} != 0)
+       {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(20000))
+    end
+  elseif ({string[card]} == [Epic Hypixel EXP])
+    {string[xph-dailyxp]}.+(40000).set(~)
+	{string[xph-totalxp]}.+(40000).save(~)
+    if ({string[xph-xpgoal]} != 0)
+       {string[xph-xpgoalprogress]}.set({string[xph-xpgoalprogress]}.+(40000))
+    end
+  end
+  if ({string[xph-xpgoalprogress]}.>=({string[xph-xpgoal]}))
+  if ({string[xph-xpgoal]} != 0)
+    chat &aYou've reached your goal of &e{string[xph-xpgoal]}&a XP! Congratulations!
+	sound random.levelup
+	{string[xph-xpgoal]}.set(0)
+	{string[xph-xpgoalprogress]}.save(0)
+  end
+  end
+  do {list[xph-rewardcardhistory]}.add({string[color]}&l{string[card]})
+  do {list[xph-rewardcardhistory]}.export(mods/ChatTriggers/Imports/XPHelper/Data/RewardCardHistory.txt<compact>)
 }
 
 trigger onWorldLoad(<list=XPHelper>delivery man tracker) {
@@ -631,61 +1027,6 @@ trigger onWorldLoad(<list=XPHelper>delivery man tracker) {
   end
 }
 
-// trigger onWorldLoad(delivery man tracker) {
-  // if ({string[xph-dailydismissed]} == false)
-  	// if ({string[xph-dailyvoted]} == false && [xph-dailycard]} == false && [xph-dailiesclaimed]} == false)
-	// wait 40
-	  // chat &e&m{br
-      // chat &cYou haven't claimed your daily rewards or voted yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br
-	// end
-	// elseif ({string[xph-dailyvoted]} == false && [xph-dailycard]} == false)
-	// wait 40
-	  // chat &e&m{br
-	  // chat &cYou haven't claimed your daily rewards or voted yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br
-	// end
-	// elseif ({string[xph-dailyvoted]} == false && {xph-dailiesclaimed]} == false)
-	// wait 40
-	  // chat &e&m{br
-	  // chat &cYou haven't claimed your daily rewards or voted yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br}
-	// end
-	// elseif ({string[xph-dailiesclaimed]} == false && {xph-dailycard]} == false)
-	// wait 40
-	  // chat &e&m{br}
-	  // chat &cYou haven't claimed your daily rewards yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br}
-	// end
-	// elseif ({string[xph-dailiesclaimed]} == false)
-	// wait 40
-	  // chat &e&m{br}
-	  // chat &cYou haven't claimed your daily rewards yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br}
-	// end
-	// elseif ({string[xph-dailycard]} == false)
-	// wait 40
-	  // chat &e&m{br}
-	  // chat &cYou haven't claimed your daily rewards yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br}
-	// end
-	// elseif ({string[xph-dailyvoted]} == false)
-	// wait 40
-	  // chat &e&m{br}
-	  // chat &cYou haven't voted yet today!
-	  // chat \nclickable(&e[WARP],run_command,/delivery,&aWarp to the delivery man)\n\nclickable(&c[Dismiss],run_command,/tr xph dismiss daily warning,&cDismiss this message for the day)
-	  // chat &e&m{br}
-	// end
-	// end
-  // end
-// }
-
 trigger other(<list=XPHelper>xph dismiss daily warning) {
   chat &e&m{br}
   chat &cDismissed this warning.
@@ -716,7 +1057,6 @@ trigger chat(<list=XPHelper>&aToday's voting link is &r&b{string[HV-vote]1}&r&a!
   end
 }
 
-
 // \n&r&aDon't Blink Challenge Completed!&r\n&r&7 &8+&32400&7&7 Hypixel Experience&r\n&r\n&r&7You can complete &e&e6 &7more challenges today.&r\n&r
 
 // \n&r&aDaily Quest: Sniper Completed!&r\n&r&7 &8+&32500&7&7 Hypixel Experience&r\n&r&7 &8+&61750&7 &7Quakecraft Coins&r\n&r
@@ -728,5 +1068,9 @@ trigger chat(<list=XPHelper>&aToday's voting link is &r&b{string[HV-vote]1}&r&a!
 // &6Thanks for supporting the server! You earned &r&95,000 XP&r&6 and 3,000 Arcade Coins!&r
 
 // &fYou have claimed a &r&f&l[Common Smash Heroes Coins] &r&freward card!&r
+
+// &fYou have claimed a &r&f&l[Common VampireZ Coins] &r&freward card!&r
+
+// &fYou have claimed a &r&6&l[Legendary Hypixel EXP] &r&freward card!&r
 
 // &r&d+25 Karma!&r
